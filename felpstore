@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Felp Store — Loja</title>
+<style>
+  :root{
+    --bg:#060606;
+    --panel:#0f0f0f;
+    --accent:#ff7a00;
+    --accent-2:#ffcc33;
+    --muted:rgba(255,255,255,0.8);
+    --glass: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,122,0,0.12);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter, "Segoe UI", Roboto, Arial;background: radial-gradient(ellipse at 50% 10%, rgba(255,120,0,0.04), transparent 10%), linear-gradient(#070707,#0b0b0b); color:#eee; min-height:100vh}
+  /* header */
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;position:sticky;top:0;background:linear-gradient(90deg,rgba(0,0,0,0.5),transparent);border-bottom:1px solid rgba(255,255,255,0.03);z-index:40}
+  .logo{display:flex;gap:8px;align-items:end}
+  .logo .main{font-weight:900;font-size:22px;color:var(--accent-2);text-shadow:0 0 18px rgba(255,122,0,0.25)}
+  nav a{color:rgba(255,255,255,0.72);text-decoration:none;margin-left:12px;font-weight:600}
+  .actions{display:flex;gap:8px;align-items:center}
+  button.btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:0;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer;color:#111}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
+  /* hero with flame effect (CSS only) */
+  .hero{
+    padding:36px 20px;
+    display:flex;
+    gap:20px;
+    align-items:center;
+    justify-content:space-between;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(255,120,0,0.06), transparent 6%),
+      radial-gradient(circle at 90% 85%, rgba(255,80,0,0.04), transparent 8%),
+      linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.25));
+  }
+  .hero-left{max-width:720px}
+  .hero h1{margin:0;font-size:44px;color:var(--accent-2);text-shadow:0 6px 0 rgba(0,0,0,0.6)}
+  .hero p{color:rgba(255,255,255,0.85);margin:8px 0 16px}
+  .art{
+    width:380px;height:260px;border-radius:12px;background:
+    linear-gradient(180deg, rgba(255,120,0,0.06), rgba(0,0,0,0.5));
+    border:1px solid var(--glass-border);
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);
+    position:relative;
+    overflow:hidden;
+  }
+  /* subtle flame animation using gradients */
+  .art::before{
+    content:"";position:absolute;inset:0;background:
+    radial-gradient(circle at 30% 70%, rgba(255,90,0,0.14), transparent 20%),
+    radial-gradient(circle at 70% 30%, rgba(255,180,0,0.06), transparent 12%);
+    mix-blend-mode:screen;opacity:1;
+  }
+
+  /* layout */
+  main{padding:18px 20px;max-width:1150px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
+  .catalog{background:linear-gradient(180deg, rgba(10,10,10,0.9), rgba(12,12,12,0.96));padding:16px;border-radius:12px;border:1px solid var(--glass-border)}
+  .product{display:flex;gap:12px;padding:12px;border-radius:8px;background:linear-gradient(180deg, rgba(20,20,20,0.6), rgba(18,18,18,0.6));align-items:center;margin-bottom:10px}
+  .thumb{width:90px;height:70px;border-radius:8px;background:linear-gradient(180deg, rgba(255,120,0,0.06), rgba(0,0,0,0.35));display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(255,255,255,0.12)}
+  .pmeta{flex:1}
+  .pmeta h3{margin:0;font-size:16px}
+  .pmeta p{margin:4px 0;color:rgba(255,255,255,0.8);font-size:13px}
+  .price{font-weight:900;color:var(--accent-2);font-size:16px}
+  .add-btn{padding:8px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,122,0,0.14);color:var(--accent-2);cursor:pointer}
+
+  /* right column: cart + account */
+  .side{display:flex;flex-direction:column;gap:12px}
+  .panel{background:linear-gradient(180deg, rgba(18,18,18,0.95), rgba(8,8,8,0.9));padding:12px;border-radius:10px;border:1px solid var(--glass-border)}
+  .cart-items{max-height:240px;overflow:auto}
+  .cart-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.03)}
+  .cart-row small{opacity:0.9}
+  .cart-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .qty-inline{display:flex;gap:6px;align-items:center}
+  .qty-inline button{padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer}
+
+  /* login modal */
+  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.6));z-index:80}
+  .card{background:#0b0b0b;padding:18px;border-radius:10px;width:360px;border:1px solid var(--glass-border)}
+  .card h3{margin:0 0 10px 0;color:var(--accent-2)}
+  .field{display:flex;flex-direction:column;margin-bottom:10px}
+  .field input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted)}
+  .muted{color:rgba(255,255,255,0.7);font-size:13px}
+  .orders-list{max-height:300px;overflow:auto}
+
+  footer{padding:18px;text-align:center;color:rgba(255,255,255,0.55);margin-top:18px}
+  @media(max-width:920px){
+    .grid{grid-template-columns:1fr;gap:12px}
+    .art{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="main">FELP STORE</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:12px">GAMER</div>
+  </div>
+
+  <nav>
+    <a href="#produtos">Produtos</a>
+    <a href="#servicos">Serviços</a>
+    <a href="#contato">Contato</a>
+  </nav>
+
+  <div class="actions">
+    <button id="openLogin" class="ghost">Entrar / Cadastrar</button>
+    <button id="cartToggle" class="btn">🛒 <span id="cartCount">0</span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-left">
+    <h1>Felp Store — XIT`s</h1>
+    <p>Ajustes de sensibilidade, xit`s. Produtos legais, com entrega por arquivo e suporte via WhatsApp.</p>
+    <div style="margin-top:12px">
+      <button class="btn" onclick="scrollToCatalog()">Ver produtos</button>
+      <button class="ghost" onclick="scrollToContact()">Contato</button>
+    </div>
+  </div>
+
+  <div class="art" aria-hidden="true">
+    <!-- decorative art area -->
+  </div>
+</section>
+
+<main>
+  <div class="grid">
+    <!-- CATALOG -->
+    <div>
+      <div id="produtos" class="catalog">
+        <h2 style="color:var(--accent-2)">PRODUTOS: iOS/Android</h2>
+        <p class="muted">(packs de sensi e xit).</p>
+
+        <div id="productsList">
+          <!-- products inserted by JS -->
+        </div>
+      </div>
+
+      <!-- pricing tables (visual copy of flyer) -->
+      <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px" class="panel">
+          <h3 style="margin:0;color:var(--accent-2)">Normal</h3>
+          <div style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.03)">
+              <div>HS Pescoço</div><div style="font-weight:800;color:var(--accent-2)">R$ 48,99</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.03)">
+              <div>HS Peito</div><div style="font-weight:800;color:var(--accent-2)">R$ 57,99</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.03)">
+              <div>HS Alto (Pro)</div><div style="font-weight:800;color:var(--accent-2)">R$ 60,00</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:260px" class="panel">
+          <h3 style="margin:0;color:var(--accent-2)">COM HOLOGRAMA</h3>
+          <div style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.03)">
+              <div>HS Alto HOLOGRAMA</div><div style="font-weight:800;color:var(--accent-2)">R$ 70,00</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.03)">
+              <div>HS Pescoço HOLOGRAMA</div><div style="font-weight:800;color:var(--accent-2)">R$ 60,00</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.03)">
+              <div>HS Peito HOLOGRAMA</div><div style="font-weight:800;color:var(--accent-2)">R$ 69,99</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- contact / info -->
+      <div id="contato" class="panel" style="margin-top:14px">
+        <h3 style="margin:0;color:var(--accent-2)">Como comprar</h3>
+        <p class="muted" style="margin-top:8px">Adicione ao carrinho e finalize por WhatsApp (link automático) ou gere um PIX para o pagamento.</p>
+        <p style="margin-top:12px"><strong>WhatsApp:</strong> <a id="waLink" href="https://wa.me/5577991220221?text=Ol%C3%A1%2C+quero+comprar" target="_blank" style="color:var(--accent-2);text-decoration:none">+55 77 991220221</a></p>
+      </div>
+    </div>
+
+    <!-- SIDE: CART + ACCOUNT -->
+    <aside class="side">
+      <div class="panel">
+        <h3 style="margin:0;color:var(--accent-2)">Carrinho</h3>
+        <div class="cart-items" id="cartItems" style="margin-top:10px">
+          <p class="muted">Carrinho vazio</p>
+        </div>
+
+        <div class="cart-footer">
+          <div><strong>Total:</strong> <span id="cartTotal">R$ 0,00</span></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="checkoutWhats" class="btn">Finalizar (WhatsApp)</button>
+          <button id="checkoutPix" class="ghost">Gerar PIX</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin:0;color:var(--accent-2)">Minha Conta</h3>
+        <p class="muted" id="acctInfo" style="margin-top:10px">Você não está conectado.</p>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="openLogin2" class="btn ghost">Entrar / Cadastrar</button>
+          <button id="logoutBtn" class="ghost" style="display:none">Sair</button>
+        </div>
+        <div style="margin-top:12px">
+          <h4 style="margin:0;color:var(--accent-2)">Pedidos</h4>
+          <div class="orders-list" id="ordersList" style="margin-top:8px"><p class="muted">Faça login para ver seus pedidos aqui.</p></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  © <span id="year"></span> Felp Store — Todos os direitos reservados. • Não distribuímos cheats; oferecemos serviços legais para jogadores.
+</footer>
+
+<!-- LOGIN / REGISTER MODAL (hidden) -->
+<div id="modal" class="modal" style="display:none">
+  <div class="card">
+    <h3 id="modalTitle">Entrar na sua conta</h3>
+
+    <div id="formLogin">
+      <div class="field"><label class="muted">Usuário</label><input id="loginUser" placeholder="seunome" /></div>
+      <div class="field"><label class="muted">Senha</label><input id="loginPass" type="password" placeholder="senha" /></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="toRegister" class="ghost">Criar conta</button>
+        <button id="doLogin" class="btn">Entrar</button>
+      </div>
+    </div>
+
+    <div id="formRegister" style="display:none">
+      <div class="field"><label class="muted">Usuário</label><input id="regUser" placeholder="nome de usuário" /></div>
+      <div class="field"><label class="muted">Senha</label><input id="regPass" type="password" placeholder="senha (mín 4 chars)" /></div>
+      <div class="field"><label class="muted">WhatsApp (opcional)</label><input id="regWhats" placeholder="55XXXXXXXXXXX" /></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="toLogin" class="ghost">Voltar</button>
+        <button id="doRegister" class="btn">Criar</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <button id="closeModal" class="ghost" style="width:100%">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== Dados iniciais ========== */
+const products = [
+  { id: "HS_pescoco", name: "HS Pescoço", price: 48.99, desc: "CONTANDO HS NO PERCOÇO." },
+  { id: "HS_peito", name: "HS Peito ", price: 57.99, desc: "CONTANDO HS NO PEITO." },
+  { id: "HS_alto", name: "HS Alto ", price: 60.00, desc: "HS ACIMA DA CABEÇA." },
+  { id: "HS_alto_art", name: "HS Alto HOLO", price: 70.00, desc: "HS ALTO COM HOLOGRAMA." },
+  { id: "HS_pescoco_art", name: "HS Pescoço HOLO", price: 60.00, desc: "HS PESCOÇO COM HOLOGRAMA." },
+  { id: "HS_peito_art", name: "HS Peito HOLO", price: 69.99, desc: "HS Peito com HOLOGRAMA." },
+];
+
+let cart = [];
+
+/* ========== Helpers ========== */
+function formatBRL(v){ return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function $(id){ return document.getElementById(id); }
+
+/* ========== Render products ========== */
+function renderProducts(){
+  const wrap = $('productsList'); wrap.innerHTML = '';
+  products.forEach(p=>{
+    const el = document.createElement('div'); el.className='product';
+    el.innerHTML = `
+      <div class="thumb">${p.name.split(' ')[0]}</div>
+      <div class="pmeta">
+        <h3>${p.name}</h3>
+        <p>${p.desc}</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+          <div class="price">${formatBRL(p.price)}</div>
+          <button class="add-btn" data-id="${p.id}">Adicionar</button>
+        </div>
+      </div>
+    `;
+    wrap.appendChild(el);
+  });
+  document.querySelectorAll('.add-btn').forEach(b=>{
+    b.addEventListener('click', e=>{
+      const id = e.currentTarget.dataset.id; addToCart(id);
+    });
+  });
+}
+
+/* ========== Cart management ========== */
+function addToCart(id){
+  const p = products.find(x=>x.id===id); if(!p) return;
+  const ex = cart.find(i=>i.id===id);
+  if(ex) ex.q++;
+  else cart.push({ id:p.id, name:p.name, price:p.price, q:1 });
+  saveCartToStorage();
+  updateCartUI();
+}
+
+function updateCartUI(){
+  const container = $('cartItems');
+  container.innerHTML = '';
+  if(cart.length===0){ container.innerHTML = '<p class="muted">Carrinho vazio</p>'; }
+  else{
+    cart.forEach(item=>{
+      const row = document.createElement('div'); row.className='cart-row';
+      row.innerHTML = `
+        <div>
+          <div style="font-weight:700">${item.name}</div>
+          <small>${item.q} x ${formatBRL(item.price)}</small>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800">${formatBRL(item.price * item.q)}</div>
+          <div class="qty-inline" style="margin-top:6px">
+            <button data-id="${item.id}" data-op="minus">-</button>
+            <span style="padding:0 6px">${item.q}</span>
+            <button data-id="${item.id}" data-op="plus">+</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+    // attach qty events
+    container.querySelectorAll('button[data-op]').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const id = e.currentTarget.dataset.id;
+        const op = e.currentTarget.dataset.op;
+        const it = cart.find(i=>i.id===id);
+        if(!it) return;
+        if(op==='plus') it.q++;
+        else it.q = Math.max(0, it.q-1);
+        cart = cart.filter(x=>x.q>0);
+        saveCartToStorage();
+        updateCartUI();
+      });
+    });
+  }
+  const total = cart.reduce((s,i)=>s+i.price*i.q,0);
+  $('cartTotal').innerText = formatBRL(total);
+  $('cartCount').innerText = cart.reduce((s,i)=>s+i.q,0);
+}
+
+/* ========== Persistence (cart + users + orders) ========== */
+function saveCartToStorage(){ localStorage.setItem('felp_cart', JSON.stringify(cart)); }
+function loadCartFromStorage(){ const c = localStorage.getItem('felp_cart'); cart = c?JSON.parse(c):[]; updateCartUI(); }
+
+/* ========== Checkout: WhatsApp & PIX ========== */
+function checkoutWhatsApp(){
+  if(cart.length===0){ alert('Carrinho vazio.'); return; }
+  const lines = cart.map(i=>`${i.q}x ${i.name} - ${formatBRL(i.price * i.q)}`);
+  const total = formatBRL(cart.reduce((s,i)=>s+i.price*i.q,0));
+  const msg = `Olá! Quero comprar:%0A${encodeURIComponent(lines.join('%0A'))}%0ATotal: ${encodeURIComponent(total)}%0ANome:`;
+  const waNumber = '5577991220221'; // <--- Troque para o seu número (sem + ou espaços)
+  const url = `https://wa.me/${waNumber}?text=${msg}`;
+  // save as order if logged in
+  saveOrderIfLogged('WhatsApp', total, lines);
+  window.open(url, '_blank');
+}
+
+/* ========== User system (localStorage) ========== */
+function getUsers(){ return JSON.parse(localStorage.getItem('felp_users')||'{}'); }
+function saveUsers(u){ localStorage.setItem('felp_users', JSON.stringify(u)); }
+function getCurrentUser(){ return JSON.parse(localStorage.getItem('felp_current')||'null'); }
+function setCurrentUser(obj){ localStorage.setItem('felp_current', JSON.stringify(obj)); updateAccountUI(); }
+
+function registerUser(username,password,whats){
+  if(!username || !password || password.length<4){ alert('Usuário e senha (mín 4 caracteres)'); return false; }
+  const users = getUsers();
+  if(users[username]){ alert('Usuário já existe'); return false; }
+  users[username] = { password: password, whatsapp: whats||'' , orders: [] };
+  saveUsers(users);
+  alert('Conta criada! Você já está logado.');
+  setCurrentUser({ username });
+  return true;
+}
+
+function loginUser(username,password){
+  const users = getUsers();
+  if(!users[username] || users[username].password !== password){ alert('Usuário ou senha inválidos'); return false; }
+  setCurrentUser({ username });
+  alert('Logado com sucesso.');
+  return true;
+}
+
+function logoutUser(){ localStorage.removeItem('felp_current'); updateAccountUI(); alert('Você saiu da conta.'); }
+
+/* ========== Orders (saved per user) ========== */
+function saveOrderIfLogged(method,total,lines,txid){
+  const cur = getCurrentUser();
+  if(!cur) return; // não está logado
+  const users = getUsers();
+  const entry = { id: 'ORD-'+Date.now(), date: new Date().toISOString(), method, total, items: lines, txid, status: method.startsWith('PIX') ? 'Pendente' : 'Enviado (via WhatsApp)' };
+  users[cur.username].orders = users[cur.username].orders || [];
+  users[cur.username].orders.unshift(entry);
+  saveUsers(users);
+  renderOrdersForCurrent();
+  // clear cart after saving order
+  cart = []; saveCartToStorage(); updateCartUI();
+}
+
+/* ========== Render account UI ========== */
+function updateAccountUI(){
+  const cur = getCurrentUser();
+  if(cur){
+    $('acctInfo').innerHTML = `Logado como <strong>${cur.username}</strong>`;
+    $('logoutBtn').style.display = 'inline-block';
+    $('openLogin').style.display = 'none';
+    $('openLogin2').style.display = 'none';
+  } else {
+    $('acctInfo').innerText = 'Você não está conectado.';
+    $('logoutBtn').style.display = 'none';
+    $('openLogin').style.display = 'inline-block';
+    $('openLogin2').style.display = 'inline-block';
+  }
+  renderOrdersForCurrent();
+}
+
+function renderOrdersForCurrent(){
+  const wrap = $('ordersList'); wrap.innerHTML = '';
+  const cur = getCurrentUser();
+  if(!cur){ wrap.innerHTML = '<p class="muted">Faça login para ver seus pedidos aqui.</p>'; return; }
+  const users = getUsers();
+  const orders = (users[cur.username].orders||[]);
+  if(orders.length===0){ wrap.innerHTML = '<p class="muted">Nenhum pedido ainda.</p>'; return; }
+  orders.forEach(o=>{
+    const d = document.createElement('div'); d.style.padding='8px 0'; d.style.borderBottom='1px dashed rgba(255,255,255,0.03)';
+    d.innerHTML = `<div style="font-weight:700">${o.method} • ${o.date.split('T')[0]}</div><div style="font-size:13px;color:rgba(255,255,255,0.75)">${o.items.join(', ')}</div><div style="margin-top:6px;font-weight:800">${o.total} • ${o.status}</div>`;
+    wrap.appendChild(d);
+  });
+}
+
+/* ========== Modal login/register handlers ========== */
+function showModal(showRegister=false){
+  $('modal').style.display = 'flex';
+  $('formLogin').style.display = showRegister ? 'none' : 'block';
+  $('formRegister').style.display = showRegister ? 'block' : 'none';
+  $('modalTitle').innerText = showRegister ? 'Criar conta' : 'Entrar na sua conta';
+}
+function hideModal(){ $('modal').style.display = 'none'; }
+
+/* ========== Init & events ========== */
+document.addEventListener('DOMContentLoaded', ()=>{
+  $('year').innerText = new Date().getFullYear();
+  renderProducts();
+  loadCartFromStorage();
+  updateAccountUI();
+
+  // cart toggle
+  $('cartToggle').addEventListener('click', ()=>{
+    window.scrollTo({ top: document.querySelector('.side').offsetTop - 80, behavior: 'smooth' });
+  });
+
+  // checkout buttons
+  $('checkoutWhats').addEventListener('click', checkoutWhatsApp);
+
+  // login modal controls
+  $('openLogin').addEventListener('click', ()=> showModal(false));
+  $('openLogin2').addEventListener('click', ()=> showModal(false));
+  $('closeModal').addEventListener('click', hideModal);
+
+  $('toRegister').addEventListener('click', ()=> showModal(true));
+  $('toLogin').addEventListener('click', ()=> showModal(false));
+
+  $('doRegister').addEventListener('click', ()=>{
+    const u = $('regUser').value.trim();
+    const p = $('regPass').value;
+    const w = $('regWhats').value.trim();
+    if(registerUser(u,p,w)){ hideModal(); updateAccountUI(); }
+  });
+  $('doLogin').addEventListener('click', ()=>{
+    const u = $('loginUser').value.trim();
+    const p = $('loginPass').value;
+    if(loginUser(u,p)){ hideModal(); updateAccountUI(); }
+  });
+
+  $('logoutBtn').addEventListener('click', ()=>{ logoutUser(); });
+
+  // pre-fill whatsapp link (in case user changed phone)
+  // find waLink and replace the phone if you change the var at top
+});
+
+/* ========== Utility scrolls ========== */
+function scrollToCatalog(){ document.querySelector('#produtos').scrollIntoView({behavior:'smooth'}); }
+function scrollToContact(){ document.querySelector('#contato').scrollIntoView({behavior:'smooth'}); }
+</script>
+
+</body>
+</html>
